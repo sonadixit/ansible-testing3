@@ -24,8 +24,11 @@
     creates: "{{ alertmanager_install_dir }}/alertmanager-{{ alertmanager_version }}"
 
 - name: Rename Alertmanager binary
-  command: mv "{{ alertmanager_install_dir }}/alertmanager-{{ alertmanager_version }}/alertmanager" "{{ alertmanager_install_dir }}/alertmanager"
-
+  file:
+    src: "{{ alertmanager_install_dir }}/alertmanager-{{ alertmanager_version }}/alertmanager"
+    dest: "{{ alertmanager_install_dir }}/alertmanager"
+    state: link
+    force: yes
 - name: Create Alertmanager configuration directory
   file:
     path: "/etc/alertmanager/"
@@ -38,5 +41,6 @@
 
 - name: Create Alertmanager service file
   template:
-    src: alertmanager.service.j2
+    src: roles/monitoring/templates/alertmanager.service.j2
     dest: "{{ alertmanager_service_dest }}"
+~                                           
