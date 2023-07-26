@@ -1,0 +1,40 @@
+---
+- name: Install required packages for Grafana on Debian/Ubuntu
+  ansible.builtin.package:
+    name:
+      - apt-transport-https
+      - unzip
+    state: present
+  when: ansible_distribution in ['Debian', 'Ubuntu']
+
+- name: Install required packages for Grafana on Red Hat/CentOS
+  ansible.builtin.package:
+    name:
+      - unzip
+    state: present
+  when: ansible_distribution in ['RedHat', 'CentOS']
+
+- name: Download Grafana archive
+  ansible.builtin.get_url:
+    url: "{{ grafana_download_url }}"
+    dest: "/tmp/grafana-{{ grafana_version }}.zip"
+
+- name: Unzip Grafana archive
+  ansible.builtin.unarchive:
+    src: "/tmp/grafana-{{ grafana_version }}.zip"
+    dest: /opt/
+    remote_src: yes
+    owner: root
+    group: root
+
+- name: Create a symlink for Grafana
+  ansible.builtin.file:
+    src: "/opt/grafana-{{ grafana_version }}"
+    dest: /opt/grafana
+    state: link
+
+- name: Start Grafana service and enable it on boot
+  ansible.builtin.systemd:
+    name: grafana-server
+    state: started
+    enabled: yes
