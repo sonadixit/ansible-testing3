@@ -10,5 +10,5 @@ alertmanager_url: "https://github.com/prometheus/alertmanager/releases/download/
 alertmanager_install_dir: "/usr/local/bin"
 alertmanager_config_src: "roles/monitoring/files/alertmanager.yml"  
 alertmanager_config_dest: "/etc/alertmanager/alertmanager.yml"
-alertmanager_service_src: "roles/monitoring/files/alertmanager.service.j2"  
+alertmanager_service_src: "roles/monitoring/templates/alertmanager.service.j2"  
 alertmanager_service_dest: "/etc/systemd/system/alertmanager.service"
