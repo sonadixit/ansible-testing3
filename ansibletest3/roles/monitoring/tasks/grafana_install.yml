@@ -14,27 +14,39 @@
     state: present
   when: ansible_distribution in ['RedHat', 'CentOS']
 
-- name: Download Grafana archive
-  ansible.builtin.get_url:
-    url: "{{ grafana_download_url }}"
-    dest: "/tmp/grafana-{{ grafana_version }}.zip"
+- name: Download Grafana binary
+  get_url:
+    url: "{{ grafana_url }}"
+    dest: "/tmp/grafana-{{ grafana_version }}.linux-amd64.tar.gz"
 
-- name: Unzip Grafana archive
-  ansible.builtin.unarchive:
-    src: "/tmp/grafana-{{ grafana_version }}.zip"
-    dest: /opt/
+- name: Extract Grafana binary
+  unarchive:
+    src: "/tmp/grafana-{{ grafana_version }}.linux-amd64.tar.gz"
+    dest: "{{ grafana_install_dir }}"
     remote_src: yes
-    owner: root
-    group: root
+    creates: "{{ grafana_install_dir }}/grafana-{{ grafana_version }}"
 
-- name: Create a symlink for Grafana
-  ansible.builtin.file:
-    src: "/opt/grafana-{{ grafana_version }}"
-    dest: /opt/grafana
-    state: link
+- name: Create Grafana configuration directory
+  file:
+    path: "/etc/grafana/"
+    state: directory
+
+- name: Copy Grafana configuration file
+  copy:
+    src: "grafana.ini.j2"
+    dest: "{{ grafana_config_dest }}"
+
+- name: Create Grafana service file
+  copy:
+    src: "grafana.service.j2"
+    dest: "{{ grafana_service_dest }}"
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: yes
 
 - name: Start Grafana service and enable it on boot
-  ansible.builtin.systemd:
-    name: grafana-server
+  service:
+    name: "{{ grafana_service_name }}"
     state: started
     enabled: yes
